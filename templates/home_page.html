@@ -49,8 +49,13 @@
               <div class="team-player">
                 <div class="card card-plain">
                   <div class="col-md-6 ml-auto mr-auto">
+                    {% if 'http' in p.photo.url %}
+                    <img src="{{ p.photo }}" alt="{{ p.name }}"
+                         style="height: 200px;width: auto;border-radius: 20px;">
+                    {% else %}
                     <img src="{{ p.photo.url }}" alt="{{ p.name }}"
                          style="height: 200px;width: auto;border-radius: 20px;">
+                    {% endif %}
                   </div>
                   <h4 class="card-title">{{ p.name }}<br>
                   </h4>

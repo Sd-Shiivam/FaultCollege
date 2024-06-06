@@ -16,17 +16,16 @@ def checklogin(session_cookies):
     elif utype == "22":
         if not Teacher.objects.filter(id=uid).exists():
             return redirect("homepage")
-
+    
 def home(request):
     if request.session.get('CookiesId'):
         return redirect("student_dashboard")
     
     parms = {
-        "source_code": "hello",
+        "source_code": "https://github.com/Sd-Shiivam/FaultCollege",
         "hackers": hackersDB.objects.all()
     }
     return render(request, "home_page.html", parms)
-
 
 def forget_pass(request):
     if request.method == 'POST':
