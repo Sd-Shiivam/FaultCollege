@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Student's Dashboard</title>
+{% endblock %}
+
+{% block body %}
+
+<body class="shopping-cart sidebar-collapse">
+  <nav class="navbar navbar-color-on-scroll navbar-transparent    fixed-top  navbar-expand-lg " color-on-scroll="100"
+       id="sectionsNav">
+    <div class="container">
+      <div class="navbar-translate">
+        <a href="{% url 'homepage' %}" style="color: white;">
+          <div class="navbar-brand">
+            Attendance Management
+          </div>
+        </a>
+      </div>
+      <a href="{% url 'logout' %}">
+        <button type="submit" class="btn btn-danger btn-raised btn-lg">Log Out</button>
+      </a>
+    </div>
+  </nav>
+  <div class="page-header header-filter header-small" data-parallax="true"
+       style="background-image: url('../static/img/bkg.jpg');">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 ml-auto mr-auto text-center">
+          <h2 class="title">Hello {{profile.name}}</h2>
+          <span>Welcome Back</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main main-raised">
+    <div class="container">
+      <div class="card card-plain">
+        <div class="card-body">
+          <h3 class="card-title">
+            Roll No. : {{profile.RollNo}} <br>
+            Name : {{profile.name}} <br>
+            Email : {{profile.email}} <br>
+            Current Attendance : {{percentage}} % <br>
+          </h3>
+          <span> <b>Note:</b> Keep your Roll Number safe. To rest your password it will be required. </span>
+          <h2 class="card-title" style="display: flex;justify-content: center;">Recent Classes </h2>
+          <br />
+          <div class="table-responsive">
+            <table class="table table-shopping table-striped">
+              <thead>
+                <tr>
+                  <th>Topic</th>
+                  <th class="text-center">Teacher Name</th>
+                  <th class="text-center">Date</th>
+                  <th class="text-center"> Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for c in myclsses %}
+                <tr>
+                  <td class="td-name">
+                    {{c.lecture.topic}}
+                  </td>
+                  <td class="td-number text-center">
+                    {{c.lecture.teacher.name}}
+                  </td>
+                  <td class="td-number text-center">
+                    {{c.lecture.date|date:'Y-m-d'}}
+                  </td>
+                  {% if c.attended %}
+                  <td class="td-number text-center">
+                    Present
+                  </td>
+                  {% else %}
+                  <td class="td-number text-center" style="color: red;">
+                    Absent
+                  </td>
+                  {% endif %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>AM Student Sign Up</title>
+{% endblock %}
+
+{% block body %}
+
+<body class="login-page sidebar-collapse">
+  <nav class="navbar navbar-color-on-scroll navbar-transparent    fixed-top  navbar-expand-lg " color-on-scroll="100"
+       id="sectionsNav">
+    <div class="container">
+      <div class="navbar-translate">
+        <a href="{% url 'homepage' %}" style="color: white;">
+          <div class="navbar-brand">
+            Attendance Management
+          </div>
+        </a>
+      </div>
+    </div>
+  </nav>
+  <div class="page-header header-filter"
+       style="background-image: url('../static/img/bkg.jpg'); background-size: cover; background-position: top center;">
+    <div class="container" style="padding-top: 10vh;">
+      <div class="row">
+        <div class="col-lg-4 col-md-6 col-sm-8 ml-auto mr-auto">
+          <form class="form" method="POST" action="{% url 'student_signup' %}">
+            {% csrf_token %}
+            <div class="card card-login">
+              <h2 class="card-title text-center">Student Sign Up</h2>
+              <div class="card-body ">
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == 'error' %}
+                <h4 class="justify-content-center" style="background-color: red;color: white;">{{ message }}</h4>
+                {% else %}
+                <h4 class="justify-content-center" style="background-color: green;color: white;">{{ message }}</h4>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                <span class="bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        Full Name
+                      </span>
+                    </div>
+                    <input name="name" type="text" class="form-control" placeholder="Please enter your full name..."
+                           required>
+                  </div>
+                </span>
+                <span class="bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        E-mail ID
+                      </span>
+                    </div>
+                    <input name="email" type="email" class="form-control" placeholder="Please enter your e-mail ID..."
+                           required>
+                  </div>
+                </span>
+                <span class="bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        Enter Password
+                      </span>
+                    </div>
+                    <input name="password" type="password" class="form-control" placeholder="Password..." required>
+                  </div>
+                </span>
+                <span class="bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        Conform Password
+                      </span>
+                    </div>
+                    <input name="password2" type="password" class="form-control" placeholder="Re-type Password..."
+                           required>
+                  </div>
+                </span>
+              </div>
+              <div class="card-footer justify-content-center">
+                <button type="submit" class="btn btn-danger btn-raised btn-lg">Register</button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

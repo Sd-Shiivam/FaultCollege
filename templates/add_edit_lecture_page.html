@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>Add/Edit Lecture</title>
+{% endblock %}
+
+{% block body %}
+
+<body class="shopping-cart sidebar-collapse">
+  <nav class="navbar navbar-color-on-scroll navbar-transparent    fixed-top  navbar-expand-lg " color-on-scroll="100"
+       id="sectionsNav">
+    <div class="container">
+      <div class="navbar-translate">
+        <a href="{% url 'homepage' %}" style="color: white;">
+          <div class="navbar-brand">
+            Attendance Management
+          </div>
+        </a>
+      </div>
+    </div>
+  </nav>
+  <div class="page-header header-filter header-small" data-parallax="true"
+       style="background-image: url('../static/img/bkg.jpg');">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-8 ml-auto mr-auto text-center">
+          <h2 class="title">Add / Edit Lecture</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main main-raised">
+    <div class="container">
+      <div class="card card-plain">
+        <div class="card-body">
+          <h3 class="card-title">
+            <form class="form" method="POST" action="{% url 'add_edit_lecture' %}">
+              {% csrf_token %}
+              <div class="card card-login card-hidden">
+                <h2 class="card-title text-center">
+                  {% if lecture %}
+                  Update the lecture
+                  {% else %}
+                  Add New Lecture
+                  {% endif %}
+                </h2>
+                <div class="card-body ">
+                  {% if messages %}
+                  {% for message in messages %}
+                  {% if message.tags == 'error' %}
+                  <h4 class="justify-content-center" style="background-color: red;color: white;">{{ message }}</h4>
+                  {% else %}
+                  <h4 class="justify-content-center" style="background-color: green;color: white;">{{ message }}</h4>
+                  {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                  <span class="bmd-form-group">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          Topic Name :
+                        </span>
+                      </div>
+                      {% if lecture %}
+                      <input name="lecture_id" type="text" class="form-control"
+                             value="{{lecture.pk}}"
+                             hidden>
+                      <input name="lecture_name" type="text" class="form-control"
+                             placeholder="Please enter your full name..."
+                             value="{{ lecture.topic }}"
+                             required>
+                      {% else %}
+                      <input name="lecture_id" type="text" class="form-control"
+                             value=""
+                             hidden>
+                      <input name="lecture_name" type="text" class="form-control"
+                             placeholder="Please enter your full name..."
+                             value=""
+                             required>
+                      {% endif %}
+                    </div>
+                  </span>
+                  <span class="bmd-form-group">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          Lecture Date :
+                        </span>
+                      </div>
+                      <input name="date" type="date" class="form-control"
+                             placeholder="Please enter your full name..."
+                             value="{{ lecture.date|date:'Y-m-d' }}"
+                             required>
+                    </div>
+                  </span>
+                  <span class="row">
+                    <span class="bmd-form-group col-md-6">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            Start Time :
+                          </span>
+                        </div>
+                        <input name="start_time" type="time" class="form-control"
+                               placeholder="Please enter your full name..."
+                               value="{{ lecture.start_time|time:'H:i' }}"
+                               required>
+                      </div>
+                    </span>
+                    <span class="bmd-form-group col-md-6">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">
+                            End Time :
+                          </span>
+                        </div>
+                        <input name="end_time" type="time" class="form-control"
+                               placeholder="Please enter your full name..."
+                               value="{{ lecture.end_time|time:'H:i' }}"
+                               required>
+                      </div>
+                    </span>
+                  </span>
+                  <span class="bmd-form-group">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text">
+                          Students Presents :
+                        </span>
+                      </div>
+                      {% for student in students %}
+                      <div style="width: fit-content;margin: 0px 10px;">
+                        <input type="checkbox" name="present_students" value="{{ student.id }}"
+                               id="student_{{ student.id }}"
+                               {% if student.id in Atstudents %}
+                               checked
+                               {% endif %}>
+                        <label for="student_{{ student.id }}">{{ student.name }}</label><br>
+                      </div>
+                      {% endfor %}
+                    </div>
+                  </span>
+                </div>
+                <div class="card-footer justify-content-center">
+                  <button type="submit" class="btn btn-danger btn-raised btn-lg">
+                    {% if lecture %}
+                    Update
+                    {% else %}
+                    Add
+                    {% endif %}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </h3>
+          <br />
+          <div class="table-responsive">
+            <form action="{% url 'add_edit_lecture' %}" method="POST">
+              {% csrf_token %}
+              <h2 class="card-title" style="display: flex;justify-content: center;"> Your Lectures </h2>
+              <table class="table table-shopping table-striped">
+                <thead>
+                  <tr>
+                    <th class="text-center">Topic</th>
+                    <th class="text-center">date</th>
+                    <th class="text-center">Attendance %</th>
+                    <th class="text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for l in lecture_states %}
+                  <tr>
+                    <td class="td-number text-center">
+                      {{ l.topic }}
+                    </td>
+                    <td class="td-number text-center">
+                      {{ l.name }}
+                    </td>
+                    <td class="td-number text-center">
+                      {{ l.percentage }}
+                    </td>
+                    <td class="td-number text-center">
+                      <a href="{% url 'add_edit_lecture' %}?lecture_id={{l.pk}}" style="color: #f44336;">edit</a>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}

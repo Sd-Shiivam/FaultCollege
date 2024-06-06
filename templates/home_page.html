@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Attendance Manager</title>
+{% endblock %}
+
+{% block body %}
+
+<body class="landing-page sidebar-collapse">
+  <div class="page-header header-filter" data-parallax="true"
+       style="background-image: url('../static/img/bkg.jpg')">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <a href="{% url 'homepage' %}" style="color: white;">
+            <h1 class="title">Attendance Management.</h1>
+          </a>
+          <h4>A solution for both teachers and students!</h4>
+          <br>
+          <h4> messages</h4>
+          <a href="{% url 'student_login' %}">
+            <button type="submit" class="btn btn-danger btn-raised btn-lg">
+              <i class="fa fa-user-circle-o"></i>
+              Student log in/sign up
+            </button>
+          </a>
+          <a href="{% url 'teacher_login' %}">
+            <button type="submit" class="btn btn-danger btn-raised btn-lg">
+              <i class="fa fa-user-circle-o"></i>
+              Teacher log in/sign up
+            </button>
+          </a>
+          <h4>This is an open source project! View the code or contribute <a
+               href="{{source_code}}" style="color: yellow;">here</a>!</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main main-raised">
+    <div class="container">
+      <div class="section text-center">
+        <h2 class="title">Hackers Profile (Hack and add Your)</h2>
+        <div class="team">
+          <div class="row" style="place-content: center;">
+            <!-- profile card -->
+            {% if hackers %}
+            {% for p in hackers %}
+            <div class="col-md-4">
+              <div class="team-player">
+                <div class="card card-plain">
+                  <div class="col-md-6 ml-auto mr-auto">
+                    <img src="{{ p.photo.url }}" alt="{{ p.name }}"
+                         style="height: 200px;width: auto;border-radius: 20px;">
+                  </div>
+                  <h4 class="card-title">{{ p.name }}<br>
+                  </h4>
+                  <div class="card-footer justify-content-center">
+                    <a href="{{p.linkdin}}" class="btn btn-link btn-just-icon"><i
+                         class="fa fa-linkedin"></i></a>
+                    <a href="{{p.instagram}}" class="btn btn-link btn-just-icon"><i
+                         class="fa fa-instagram"></i></a>
+                    <a href="{{p.github}}" class="btn btn-link btn-just-icon"><i
+                         class="fa fa-github"></i></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            No hackers Profile
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
