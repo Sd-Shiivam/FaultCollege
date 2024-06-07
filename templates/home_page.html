@@ -57,7 +57,7 @@
                          style="height: 200px;width: auto;border-radius: 20px;">
                     {% endif %}
                   </div>
-                  <h4 class="card-title">{{ p.name }}<br>
+                  <h4 class="card-title">{{ p.name | safe }}<br>
                   </h4>
                   <div class="card-footer justify-content-center">
                     <a href="{{p.linkdin}}" class="btn btn-link btn-just-icon"><i

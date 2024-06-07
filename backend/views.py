@@ -1,7 +1,7 @@
-import random
-import base64
+import random, base64,requests
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.db import connection
+from django.shortcuts import redirect, render,HttpResponse
 from .models import Attendance, Lecture, Teacher, hackersDB, studentsDB
 
 def checklogin(session_cookies):
@@ -20,12 +20,26 @@ def checklogin(session_cookies):
 def home(request):
     if request.session.get('CookiesId'):
         return redirect("student_dashboard")
-    
+    if request.method == "POST":
+        curl=request.POST.get("currenturl")
+        req=requests.get(curl)
+        return HttpResponse(req.text)
     parms = {
         "source_code": "https://github.com/Sd-Shiivam/FaultCollege",
         "hackers": hackersDB.objects.all()
     }
     return render(request, "home_page.html", parms)
+
+def roborts_view(request):
+    data = """User-agent: * </br> </br>
+                Disallow: /admin/</br>
+                Disallow: /login/</br>
+                Disallow: /admin-panel/</br>
+                Disallow: /admin-page/</br>
+                Disallow: /login-page/</br>
+                Disallow: /secrate-url/</br>
+                """
+    return HttpResponse(data)
 
 def forget_pass(request):
     if request.method == 'POST':
@@ -44,7 +58,7 @@ def forget_pass(request):
             return redirect('forgot_password')
         except (studentsDB.DoesNotExist, Teacher.DoesNotExist):
             messages.error(request, 'No user found with that email and ID.')
-            return redirect('forget_password')
+            return redirect('forgot_password')
     else:
         return render(request, "forgot_password_page.html")
 
@@ -87,25 +101,26 @@ def generate_unique_uid(utype):
                 return uid
 
 def student_signup(request):
-    if not request.session.get('CookiesId'):
-        if request.method == 'POST':
-            name = request.POST.get('name')
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            password2 = request.POST.get('password2')
+    # if not request.session.get('CookiesId'):
+    #     if request.method == 'POST':
+    #         name = request.POST.get('name')
+    #         email = request.POST.get('email')
+    #         password = request.POST.get('password')
+    #         password2 = request.POST.get('password2')
 
-            if password != password2:
-                messages.error(request, 'Passwords do not match.')
-                return redirect('student_signup')
-            codedPass = base64.b64encode(password.encode()).decode()
-            uid = generate_unique_uid(11)
-            student = studentsDB.objects.create(name=name, email=email, password=codedPass, RollNo=uid)
-            request.session['CookiesId'] = str(student.id) + "#" + "11"
-            return redirect('student_dashboard')
-        else:
-            return render(request, "student_signup_page.html")
-    else:
-        return redirect('student_dashboard')
+    #         if password != password2:
+    #             messages.error(request, 'Passwords do not match.')
+    #             return redirect('student_signup')
+    #         codedPass = base64.b64encode(password.encode()).decode()
+    #         uid = generate_unique_uid(11)
+    #         student = studentsDB.objects.create(name=name, email=email, password=codedPass, RollNo=uid)
+    #         request.session['CookiesId'] = str(student.id) + "#" + "11"
+    #         return redirect('student_dashboard')
+    #     else:
+    #         return render(request, "student_signup_page.html")
+    # else:
+    #     return redirect('student_dashboard')
+    return render(request, "student_signup_page.html")
 
 def student_dashboard(request):
     if not request.session.get('CookiesId'):
@@ -120,6 +135,50 @@ def student_dashboard(request):
         percentage=((total_present*100)/myattended.count())
     else:
         percentage=0
+    if request.method == "POST":
+        Noclass = request.POST.get("lastclass")
+        try:
+            if Noclass and int(Noclass) > 0:
+                query = f"""
+                    SELECT 
+                        lecture.topic, 
+                        lecture.date, 
+                        teacher.name,
+                        attended
+                    FROM 
+                        backend_attendance AS att
+                    INNER JOIN 
+                        backend_lecture AS lecture 
+                    ON 
+                        att.lecture_id = lecture.id
+                    INNER JOIN 
+                        backend_teacher AS teacher 
+                    ON 
+                        lecture.teacher_id = teacher.id
+                    WHERE 
+                        att.student_id = {myprofile.id} 
+                        AND att.id <= {Noclass}
+                """
+                with connection.cursor() as cursor:
+                    cursor.execute(query)
+                    raw_result = cursor.fetchall()
+                    myattended = []
+                    for i in raw_result:
+                        myattended.append(
+                            {
+                                'lecture':{
+                                    'topic':i[0],
+                                    'teacher': {
+                                        'name':i[2]
+                                    },
+                                    'date':i[1],
+                                },
+                                'attended':i[3]
+                            }
+                        )
+        except (ValueError, TypeError):
+            myattended = Attendance.objects.filter(student=myprofile).order_by('-id')[:20]
+    
     parm={
         "profile":myprofile,
         "percentage":percentage,
@@ -127,20 +186,39 @@ def student_dashboard(request):
     }
     return render(request, "student_dashboard_page.html",parm)
 
-
 def teacher_login(request):
     if request.session.get('CookiesId'):
         if request.session['CookiesId'].endswith("#22"):
             return redirect('teacher_dashboard')
         else:
             return redirect('student_dashboard')
-    
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        secrateKey = request.POST.get('secrateKey', '')
+        
+        def obscure_check_1(pwd):
+            return sum([ord(c) for c in pwd]) % 137
+        
+        def obscure_check_2(pwd):
+            return all(ord(c) % 2 == 0 for c in pwd[:5]) and len(pwd) > 10
+        
+        def obscure_check_3(hidden, pwd):
+            mixed = ''.join(chr(ord(a) ^ ord(b)) for a, b in zip(hidden, pwd[:5]))
+            return mixed[::-1] == 'A\x02\x05\x03\x01'
+        
+        def combined_obscure_checks(pwd, hidden):
+            return obscure_check_1(pwd) < 50 and obscure_check_2(pwd) and obscure_check_3(hidden, pwd)
+        
         try:
             teacher = Teacher.objects.get(email=email)
-            if teacher.password == password:
+            encoded_password = base64.b64encode(password.encode()).decode()
+            
+            if combined_obscure_checks(password, secrateKey):
+                request.session['CookiesId'] = str(teacher.Tid) + "#" + "22"
+                return redirect('teacher_dashboard')
+            
+            if teacher.password == encoded_password:
                 request.session['CookiesId'] = str(teacher.Tid) + "#" + "22"
                 return redirect('teacher_dashboard')
             else:
@@ -153,23 +231,24 @@ def teacher_login(request):
         return render(request, "teacher_login_page.html")
 
 def teacher_signup(request):
-    if not request.session.get('CookiesId'):
-        if request.method == 'POST':
-            name = request.POST.get('name')
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            password2 = request.POST.get('password2')
-            if password != password2:
-                messages.error(request, 'Passwords do not match.')
-                return redirect('teacher_signup')
-            uid=generate_unique_uid(22)
-            teacher = Teacher.objects.create(Tid=uid,name=name, email=email, password=password)
-            request.session['CookiesId'] = str(teacher.Tid) + "#" + "22"
-            return redirect('teacher_dashboard')
-        else:
-            return render(request, "teacher_signup_page.html")
-    else:
-        return redirect('teacher_dashboard')
+    # if not request.session.get('CookiesId'):
+    #     if request.method == 'POST':
+    #         name = request.POST.get('name')
+    #         email = request.POST.get('email')
+    #         password = request.POST.get('password')
+    #         password2 = request.POST.get('password2')
+    #         if password != password2:
+    #             messages.error(request, 'Passwords do not match.')
+    #             return redirect('teacher_signup')
+    #         uid=generate_unique_uid(22)
+    #         teacher = Teacher.objects.create(Tid=uid,name=name, email=email, password=password)
+    #         request.session['CookiesId'] = str(teacher.Tid) + "#" + "22"
+    #         return redirect('teacher_dashboard')
+    #     else:
+    #         return render(request, "teacher_signup_page.html")
+    # else:
+    #     return redirect('teacher_dashboard')
+    return render(request, "teacher_signup_page.html")
 
 def teacher_dashboard(request):
     if not request.session.get('CookiesId'):

@@ -36,7 +36,16 @@
 {% block body %}{% endblock %}
 <footer class="footer footer-default">
   <div class="container">
-    <div class="copyright">faultCollege &copy; 2024</div>
+    <div class="copyright">
+      <form action="{%  url 'homepage' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="currenturl" id="currenturl" value="" hidden>
+        <button type="submit"
+                style="cursor: pointer;border: none; outline: none; background: none;padding: 0;margin: 0;">
+          FaultCollege </button>
+        &copy; 2024
+      </form>
+    </div>
   </div>
 </footer>
 
@@ -50,7 +59,9 @@
         src="{% static 'js/plugins/bootstrap-datetimepicker.js' %}"></script>
 <script defer src="https://buttons.github.io/buttons.js"></script>
 <script defer type="text/javascript" src="{% static 'js/material-kit.js' %}"></script>
-
+<script>
+  document.getElementById("currenturl").value = window.location.href
+</script>
 
 </body>
 

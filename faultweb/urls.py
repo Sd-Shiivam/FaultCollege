@@ -20,7 +20,7 @@ from django.conf.urls.static import static
 from faultweb import settings
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('Systemadmin/', admin.site.urls),
     path("",include("backend.urls"))
 ]
 
