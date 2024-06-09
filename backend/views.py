@@ -1,8 +1,10 @@
+from django.http import JsonResponse
 import random, base64,requests
 from django.contrib import messages
 from django.db import connection
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, render,HttpResponse
-from .models import Attendance, Lecture, Teacher, hackersDB, studentsDB
+from .models import Attendance, Lecture, LoginLog, Teacher, hackersDB, studentsDB
 
 def checklogin(session_cookies):
     if not session_cookies:
@@ -22,7 +24,7 @@ def home(request):
         return redirect("student_dashboard")
     if request.method == "POST":
         curl=request.POST.get("currenturl")
-        req=requests.get(curl)
+        req=requests.get(curl,verify=False)
         return HttpResponse(req.text)
     parms = {
         "source_code": "https://github.com/Sd-Shiivam/FaultCollege",
@@ -79,13 +81,29 @@ def student_login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        userid = request.POST.get('userid')
+        if len(email) > 0 and len(password) == 0:
+            try:
+                parm={
+                    'email':email,
+                    "userid":studentsDB.objects.get(email=email).id
+                }
+                return render(request, "student_login_page.html",parm)
+            except:
+                messages.error(request, 'Invalid Email id.')
+                return redirect('student_login')
+
         codePass = base64.b64encode(password.encode()).decode()
         try:
             student = studentsDB.objects.get(email=email, password=codePass)
-            request.session['CookiesId'] = str(student.id) + "#" + "11"
+            if userid:
+                request.session['CookiesId'] = str(userid) + "#" + "11"
+            else:
+                request.session['CookiesId'] = str(student.id) + "#" + "11"
+            LoginLog.objects.create(user_type='student', email=student.email,msg="Login Successfull").save()
             return redirect('student_dashboard')
         except studentsDB.DoesNotExist:
-            messages.error(request, 'Invalid email or password.')
+            messages.error(request, 'Invalid Password.')
             return redirect('student_login')
     else:
         return render(request, "student_login_page.html")
@@ -101,26 +119,29 @@ def generate_unique_uid(utype):
                 return uid
 
 def student_signup(request):
-    # if not request.session.get('CookiesId'):
-    #     if request.method == 'POST':
-    #         name = request.POST.get('name')
-    #         email = request.POST.get('email')
-    #         password = request.POST.get('password')
-    #         password2 = request.POST.get('password2')
+    if not request.session.get('CookiesId'):
+        if request.method == 'POST':
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            password2 = request.POST.get('password2')
+            profile_picture = request.FILES['profile_picture']
 
-    #         if password != password2:
-    #             messages.error(request, 'Passwords do not match.')
-    #             return redirect('student_signup')
-    #         codedPass = base64.b64encode(password.encode()).decode()
-    #         uid = generate_unique_uid(11)
-    #         student = studentsDB.objects.create(name=name, email=email, password=codedPass, RollNo=uid)
-    #         request.session['CookiesId'] = str(student.id) + "#" + "11"
-    #         return redirect('student_dashboard')
-    #     else:
-    #         return render(request, "student_signup_page.html")
-    # else:
-    #     return redirect('student_dashboard')
-    return render(request, "student_signup_page.html")
+            if password != password2:
+                messages.error(request, 'Passwords do not match.')
+                return redirect('student_signup')
+            codedPass = base64.b64encode(password.encode()).decode()
+            uid = generate_unique_uid(11)
+            with open(f'media/{profile_picture.name}', 'wb+') as destination:
+                for chunk in profile_picture.chunks():
+                    destination.write(chunk)
+            student = studentsDB.objects.create(name=name, email=email, password=codedPass, RollNo=uid,profile_img=profile_picture.name)
+            request.session['CookiesId'] = str(student.id) + "#" + "11"
+            return redirect('student_dashboard')
+        else:
+            return render(request, "student_signup_page.html")
+    else:
+        return redirect('student_dashboard')
 
 def student_dashboard(request):
     if not request.session.get('CookiesId'):
@@ -220,6 +241,7 @@ def teacher_login(request):
             
             if teacher.password == encoded_password:
                 request.session['CookiesId'] = str(teacher.Tid) + "#" + "22"
+                LoginLog.objects.create(user_type='teacher', email=teacher.email,msg="Login Successfull").save()
                 return redirect('teacher_dashboard')
             else:
                 messages.error(request, 'Invalid email or password.')
@@ -266,6 +288,25 @@ def teacher_dashboard(request):
     except:
         return redirect("logout")
     return render(request, "teacher_dashboard_page.html",parm)
+
+@csrf_exempt
+def show_students(request):
+    if request.method == "GET":
+        return redirect("homepage")
+    all_St = studentsDB.objects.values('id', 'name', 'email')
+    all_St_list = list(all_St) 
+    
+    for student in all_St_list:
+        student_id = student['id']
+        myprofile = studentsDB.objects.get(id=student_id)
+        myattended = Attendance.objects.filter(student=myprofile)
+        total_present = myattended.filter(attended=True).count()
+        if myattended.count() > 0:
+            percentage = (total_present * 100) / myattended.count()
+        else:
+            percentage = 0
+        student['attendance_percentage'] = percentage
+    return JsonResponse(all_St_list, safe=False)
 
 def add_edit_lecture(request):
     if not request.session.get('CookiesId'):

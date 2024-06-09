@@ -24,7 +24,7 @@
     <div class="container">
       <div class="row">
         <div class="col-lg-4 col-md-6 col-sm-8 ml-auto mr-auto">
-          <form class="form" method="POST" action="{% url 'student_login' %}">
+          <form class="form" id="loginform" method="POST" action="{% url 'student_login' %}">
             {% csrf_token %}
             <div class="card card-login">
               <h2 class="card-title text-center">Student Log In</h2>
@@ -46,9 +46,22 @@
                         <i class="material-icons">email</i>
                       </span>
                     </div>
-                    <input name="email" type="email" class="form-control" placeholder="Email..." required>
+                    <input name="email" onchange="emailchange(v)" id="email" type="email" class="form-control"
+                           placeholder="Email..." required>
                   </div>
                 </span>
+                {% if email and userid %}
+                <span class="bmd-form-group">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">
+                        <i class="material-icons">lock</i>
+                      </span>
+                    </div>
+                    <input name="userid" type="text" class="form-control" value="{{userid}}" disabled>
+                  </div>
+                </span>
+                {% endif %}
                 <span class="bmd-form-group">
                   <div class="input-group">
                     <div class="input-group-prepend">
@@ -56,7 +69,7 @@
                         <i class="material-icons">lock_outline</i>
                       </span>
                     </div>
-                    <input name="password" type="password" class="form-control" placeholder="Password..." required>
+                    <input name="password" type="password" class="form-control" placeholder="Password...">
                   </div>
                 </span>
               </div>
