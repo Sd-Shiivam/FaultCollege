@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from django.db import models
 
 
@@ -57,7 +57,7 @@ class LoginLog(models.Model):
     )
     user_type = models.CharField(max_length=10, choices=user_type_choices)
     email = models.CharField(max_length=500)
-    login_time = models.DateTimeField(default=datetime.timezone.now)
+    login_time = models.DateTimeField(default=datetime.now)
     msg=models.TextField()
     def __str__(self):
         return f"{self.user_type.capitalize()} {self.email} logged in at {self.login_time}"
