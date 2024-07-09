@@ -39,7 +39,19 @@ def roborts_view(request):
                 Disallow: /admin-panel/</br>
                 Disallow: /admin-page/</br>
                 Disallow: /login-page/</br>
-                Disallow: /secrate-url/</br>
+                Disallow: /secrate-url/</br> </br>
+                allowed: /forget_pass </br>
+                allowed: /logout </br>
+                allowed: /student </br>
+                allowed: /student/login </br>
+                allowed: /student/signup </br>
+                allowed: /student/dashboard </br>
+                allowed: /teacher </br>
+                allowed: /teacher/login </br>
+                allowed: /teacher/signup </br>
+                allowed: /teacher/student_list </br>
+                allowed: /teacher/dashboard </br>
+                allowed: /teacher/add_edit_lecture </br>
                 """
     return HttpResponse(data)
 

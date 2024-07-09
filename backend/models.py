@@ -39,7 +39,7 @@ class Attendance(models.Model):
     student = models.ForeignKey('studentsDB', on_delete=models.CASCADE)
     attended = models.BooleanField(default=True)
     def __str__(self):
-        return f"{self.student} - {self.lecture} | {"Persent" if self.attended else "Absent"}"
+        return f"{self.student} - {self.lecture} | {'Persent' if self.attended else 'Absent'}"
 
 class Teacher(models.Model):
     Tid=models.CharField(max_length=10, default='', blank=True)
