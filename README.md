@@ -2,6 +2,12 @@
 
 This project is a Django-based web application that aims to provide developers with a hands-on experience in identifying and mitigating the top 10 web vulnerabilities. By solving a series of challenges, developers can enhance their understanding of these vulnerabilities and learn how to secure their own applications effectively.
 
+## Live Demo
+You can access the live demo of the Vulnerable Web Project at [http://faultcollege.pythonanywhere.com/](http://faultcollege.pythonanywhere.com/). Feel free to explore the application, test its functionalities, and identify any potential bugs or vulnerabilities.
+
+Please note that the live demo is for testing and educational purposes only. It is not recommended to use the application in a production environment.
+
+Happy bug hunting!
 
 ## Installation
 
@@ -19,14 +25,14 @@ To get started with the Vulnerable Web Project, follow these steps:
 
 3. Install the project dependencies:
     ```
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
     ```
 
 ## Usage
 
 To run the Vulnerable Web Project, execute the following command in your terminal:
 ```
-python manage.py runserver
+python3 manage.py runserver
 ```
 
 Once the server is running, you can access the application in your browser at `http://localhost:8000`.
