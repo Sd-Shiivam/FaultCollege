@@ -68,6 +68,6 @@ A: Absolutely! The project is designed to provide a hands-on learning experience
 A: No, the project is intentionally vulnerable and should not be used in a production environment. It is meant for educational and learning purposes only.
 
 **Q: How can I report a security vulnerability in the Vulnerable Web Project?**
-A: If you discover a security vulnerability, please reach out to us at security@vulnerablewebproject.com.
+A: If you discover a security vulnerability, please reach out to us in issue tab of github.
 
 
